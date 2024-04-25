@@ -325,7 +325,7 @@ body .h1 {
   letter-spacing: 0.01em;
   font-weight: 700;
   font-style: normal;
-  font-size: 1.5em;
+  font-size: 2em;
   -moz-osx-font-smoothing: grayscale;
   -webkit-font-smoothing: antialiased;
 }
@@ -339,13 +339,12 @@ body .h2 {
   text-transform: none;
   letter-spacing: normal;
   font-weight: bold;
-  font-size: 1rem;
+  font-size: 1.5em;
 }
 body h3 {
   color: rgba(86,124,119,0.8);
-  text-decoration: underline;
   font-weight: bold;
-  font-size: 0.9rem;
+  font-size: 1em;
 }
 body h4,
 body h5,
@@ -1116,7 +1115,6 @@ article .content h2:before {
   top: -4px;
   left: -1rem;
   color: #cc2a41;
-  content: "#";
   font-weight: bold;
   font-size: 1.2rem;
 }
