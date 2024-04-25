@@ -482,7 +482,7 @@ body {
   color: #22272a;
   font-weight: 400;
   font-size: 18px;
-  font-family: "Arial", "Arial LG", monospace;
+  font-family: Arial, Microsoft JhengHei, monospace;
   line-height: 1.725;
   text-rendering: geometricPrecision;
   -moz-osx-font-smoothing: grayscale;
@@ -628,7 +628,7 @@ body {
   letter-spacing: 0.01em;
   font-weight: 200;
   font-style: normal;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
 }
 #header #nav ul {
   margin: 0;
@@ -779,7 +779,7 @@ body {
   letter-spacing: 0.01em;
   font-weight: 200;
   font-style: normal;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
 }
 #header-post #nav ul {
   line-height: 15px;
@@ -1269,7 +1269,7 @@ article .content .caption {
   color: #666;
   vertical-align: top;
   text-align: center;
-  font-size: 12px;
+  font-size: 14px;
 }
 #footer ul {
   margin: 0;
@@ -1416,7 +1416,7 @@ article .content .caption {
   font-display: swap;
   font-weight: 400;
   font-size: 14.4px;
-  font-family: "Arial", "Arial LG", monospace;
+  font-family: Arial, Microsoft JhengHei, monospace;
   line-height: 1.725;
   text-rendering: geometricPrecision;
   text-align: center;
@@ -1597,7 +1597,7 @@ pre {
   border: 1px dotted #666;
   border-radius: 4px;
   font-size: 13px;
-  font-family: "Arial", "Arial LG", monospace;
+  font-family: Menlo, Monaco, Consolas, Courier New, monospace;
   line-height: 22px;
   -webkit-border-radius: 4px;
 }
@@ -1618,7 +1618,7 @@ code {
   padding: 10px 15px;
   border-radius: 4px;
   background: #f5f5f5;
-  font-family: "Arial", "Arial LG", monospace;
+  font-family: Arial, Microsoft JhengHei, monospace;
   -webkit-border-radius: 4px;
 }
 .highlight figcaption {
