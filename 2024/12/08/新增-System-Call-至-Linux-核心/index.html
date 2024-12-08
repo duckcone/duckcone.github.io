@@ -33,7 +33,7 @@
 <meta property="og:image" content="https://hackmd.io/_uploads/SJrrB-mEJe.png">
 <meta property="og:image" content="https://hackmd.io/_uploads/S1Rec-7NJx.png">
 <meta property="article:published_time" content="2024-12-08T12:01:51.000Z">
-<meta property="article:modified_time" content="2024-12-08T12:09:29.466Z">
+<meta property="article:modified_time" content="2024-12-08T12:14:16.358Z">
 <meta property="article:author" content="Duck Cone">
 <meta property="article:tag" content="Linux">
 <meta name="twitter:card" content="summary">
@@ -119,7 +119,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%96%B0%E5%A2%9E-System-Call-%E8%87%B3-Linux-%E6%A0%B8%E5%BF%83"><span class="nav-number">1.</span> <span class="nav-text">新增 System Call 至 Linux 核心</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Build-Linux-Kernel"><span class="nav-number">2.</span> <span class="nav-text">Build Linux Kernel</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Build-Root-FS"><span class="nav-number">3.</span> <span class="nav-text">Build Root FS</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Add-System-Call"><span class="nav-number">4.</span> <span class="nav-text">Add System Call</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9-syscall-64-tbl"><span class="nav-number">4.1.</span> <span class="nav-text">修改 syscall_64.tbl</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9-syscalls-h"><span class="nav-number">4.2.</span> <span class="nav-text">修改 syscalls.h</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%92%B0%E5%AF%AB-system-call-%E7%A8%8B%E5%BC%8F%E7%A2%BC"><span class="nav-number">4.3.</span> <span class="nav-text">撰寫 system call 程式碼</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%B8%AC%E8%A9%A6-System-Call"><span class="nav-number">5.</span> <span class="nav-text">測試 System Call</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Run-User-Program"><span class="nav-number">6.</span> <span class="nav-text">Run User Program</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%83%E8%80%83%E8%B3%87%E6%96%99"><span class="nav-number">7.</span> <span class="nav-text">參考資料</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Build-Linux-Kernel"><span class="nav-number">1.</span> <span class="nav-text">Build Linux Kernel</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Build-Root-FS"><span class="nav-number">2.</span> <span class="nav-text">Build Root FS</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Add-System-Call"><span class="nav-number">3.</span> <span class="nav-text">Add System Call</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9-syscall-64-tbl"><span class="nav-number">3.1.</span> <span class="nav-text">修改 syscall_64.tbl</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9-syscalls-h"><span class="nav-number">3.2.</span> <span class="nav-text">修改 syscalls.h</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%92%B0%E5%AF%AB-system-call-%E7%A8%8B%E5%BC%8F%E7%A2%BC"><span class="nav-number">3.3.</span> <span class="nav-text">撰寫 system call 程式碼</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%B8%AC%E8%A9%A6-System-Call"><span class="nav-number">4.</span> <span class="nav-text">測試 System Call</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Run-User-Program"><span class="nav-number">5.</span> <span class="nav-text">Run User Program</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%83%E8%80%83%E8%B3%87%E6%96%99"><span class="nav-number">6.</span> <span class="nav-text">參考資料</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -194,7 +194,7 @@
 
     <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
       <meta itemprop="name" content="新增 System Call 至 Linux 核心 | Duck Cone">
-      <meta itemprop="description" content="在網路上尋找有關新增 system call 至 Linux 核心的文章時，發現有些文章所提供的方式無法順利執行，可能是核心版本的差異導致作法不同，因此想紀錄下自己嘗試後能夠成功的方法。">
+      <meta itemprop="description" content="">
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
@@ -239,14 +239,15 @@
     </span>
 </div>
 
-            <div class="post-description">在網路上尋找有關新增 system call 至 Linux 核心的文章時，發現有些文章所提供的方式無法順利執行，可能是核心版本的差異導致作法不同，因此想紀錄下自己嘗試後能夠成功的方法。</div>
         </div>
       </header>
 
     
     
     
-    <div class="post-body" itemprop="articleBody"><h1 id="新增-System-Call-至-Linux-核心"><a href="#新增-System-Call-至-Linux-核心" class="headerlink" title="新增 System Call 至 Linux 核心"></a>新增 System Call 至 Linux 核心</h1><p>在網路上尋找有關新增 system call 至 Linux 核心的文章時，發現有些文章所提供的方式無法順利執行，可能是核心版本的差異導致作法不同，因此想紀錄下自己嘗試後能夠成功的方法。</p>
+    <div class="post-body" itemprop="articleBody"><p>在網路上尋找有關新增 system call 至 Linux 核心的文章時，發現有些文章所提供的方式無法順利執行，可能是核心版本的差異導致作法不同，因此想紀錄下自己嘗試後能夠成功的方法。</p>
+<span id="more"></span>
+
 <p>這篇文章除了是自己的筆記之外，也告訴大家如何新增一個簡單的 system call，並且透過 QEMU 運作。同時也感謝網路上許多大神的無私奉獻，提供各種教學文章。</p>
 <p>:::warning<br>在本篇筆記的命令列範例中，若前綴為 $ 者，表示其執行在 host 端；而前綴為 # 者，表示其須執行在 guest 端 (qemu 內)<br>:::</p>
 <p>測試環境如下：</p>
