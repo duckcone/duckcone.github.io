@@ -33,7 +33,7 @@
 <meta property="og:image" content="https://hackmd.io/_uploads/SJrrB-mEJe.png">
 <meta property="og:image" content="https://hackmd.io/_uploads/S1Rec-7NJx.png">
 <meta property="article:published_time" content="2024-12-08T12:01:51.000Z">
-<meta property="article:modified_time" content="2024-12-08T12:24:41.605Z">
+<meta property="article:modified_time" content="2024-12-08T12:37:50.361Z">
 <meta property="article:author" content="Duck Cone">
 <meta property="article:tag" content="Linux">
 <meta name="twitter:card" content="summary">
@@ -325,7 +325,7 @@
 <p><code>SYSCALL_DEFINE0</code> 表示定義該 system call 無參數， <code>SYSCALL_DEFINE1</code> 代表可定義一個參數，依此類推。<br>e.g.</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&gt;SYSCALL_DEFINE1(my_syscall, <span class="type">long</span>, arg1)</span><br></pre></td></tr></table></figure>
 </blockquote>
-<p>接下來要將檔案新增到 makefile 裡面，開啟 <code>kernel/Makefile</code> 並將我們的 system call 新增至檔案內。</p>
+<p>接下來要將檔案新增到 makefile 裡面，開啟 <code>kernel/Makefile</code> 並將新增我們的 system call 。</p>
 <figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">obj-y     = fork.o exec_domain.o panic.o \</span><br><span class="line">	    cpu.o exit.o softirq.o resource.o \</span><br><span class="line">	    sysctl.o capability.o ptrace.o user.o \</span><br><span class="line">	    signal.o sys.o umh.o workqueue.o pid.o task_work.o \</span><br><span class="line">	    extable.o params.o \</span><br><span class="line">	    kthread.o sys_ni.o nsproxy.o \</span><br><span class="line">	    notifier.o ksysfs.o cred.o reboot.o \</span><br><span class="line">	    async.o range.o smpboot.o ucount.o regset.o ksyms_common.o \</span><br><span class="line">	    my_syscall.o</span><br></pre></td></tr></table></figure>
 
 <p>再重新編譯一次 kernel：</p>
