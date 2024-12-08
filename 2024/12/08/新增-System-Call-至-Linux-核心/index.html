@@ -28,12 +28,11 @@
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://hackmd.io/_uploads/H1rh_i_fke.png">
 <meta property="og:image" content="https://hackmd.io/_uploads/HJA_p9Bmkg.png">
-<meta property="og:image" content="https://hackmd.io/_uploads/SkD0m-QNyg.png">
 <meta property="og:image" content="https://hackmd.io/_uploads/HJN64-mEke.png">
 <meta property="og:image" content="https://hackmd.io/_uploads/SJrrB-mEJe.png">
 <meta property="og:image" content="https://hackmd.io/_uploads/S1Rec-7NJx.png">
 <meta property="article:published_time" content="2024-12-08T12:01:51.000Z">
-<meta property="article:modified_time" content="2024-12-08T12:37:50.361Z">
+<meta property="article:modified_time" content="2024-12-08T16:28:36.199Z">
 <meta property="article:author" content="Duck Cone">
 <meta property="article:tag" content="Linux">
 <meta name="twitter:card" content="summary">
@@ -119,7 +118,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Build-Linux-Kernel"><span class="nav-number">1.</span> <span class="nav-text">Build Linux Kernel</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Build-Root-FS"><span class="nav-number">2.</span> <span class="nav-text">Build Root FS</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Add-System-Call"><span class="nav-number">3.</span> <span class="nav-text">Add System Call</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9-syscall-64-tbl"><span class="nav-number">3.1.</span> <span class="nav-text">修改 syscall_64.tbl</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9-syscalls-h"><span class="nav-number">3.2.</span> <span class="nav-text">修改 syscalls.h</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%92%B0%E5%AF%AB-system-call-%E7%A8%8B%E5%BC%8F%E7%A2%BC"><span class="nav-number">3.3.</span> <span class="nav-text">撰寫 system call 程式碼</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%B8%AC%E8%A9%A6-System-Call"><span class="nav-number">4.</span> <span class="nav-text">測試 System Call</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Run-User-Program"><span class="nav-number">5.</span> <span class="nav-text">Run User Program</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%83%E8%80%83%E8%B3%87%E6%96%99"><span class="nav-number">6.</span> <span class="nav-text">參考資料</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%96%B0%E5%A2%9E-System-Call-%E8%87%B3-Linux-%E6%A0%B8%E5%BF%83"><span class="nav-number">1.</span> <span class="nav-text">新增 System Call 至 Linux 核心</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Build-Linux-Kernel"><span class="nav-number">2.</span> <span class="nav-text">Build Linux Kernel</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Build-Root-FS"><span class="nav-number">3.</span> <span class="nav-text">Build Root FS</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Add-System-Call"><span class="nav-number">4.</span> <span class="nav-text">Add System Call</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9-syscall-64-tbl"><span class="nav-number">4.1.</span> <span class="nav-text">修改 syscall_64.tbl</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9-syscalls-h"><span class="nav-number">4.2.</span> <span class="nav-text">修改 syscalls.h</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%92%B0%E5%AF%AB-system-call-%E7%A8%8B%E5%BC%8F%E7%A2%BC"><span class="nav-number">4.3.</span> <span class="nav-text">撰寫 system call 程式碼</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%B8%AC%E8%A9%A6-System-Call"><span class="nav-number">5.</span> <span class="nav-text">測試 System Call</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Run-User-Program"><span class="nav-number">6.</span> <span class="nav-text">Run User Program</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%83%E8%80%83%E8%B3%87%E6%96%99"><span class="nav-number">7.</span> <span class="nav-text">參考資料</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -194,7 +193,7 @@
 
     <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
       <meta itemprop="name" content="新增 System Call 至 Linux 核心 | Duck Cone">
-      <meta itemprop="description" content="">
+      <meta itemprop="description" content="在網路上尋找有關新增 system call 至 Linux 核心的文章時，發現有些文章所提供的方式無法順利執行，可能是核心版本的差異導致作法不同，因此想紀錄下自己嘗試後能夠成功的方法。">
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
@@ -228,29 +227,29 @@
         <i class="far fa-file-word"></i>
       </span>
       <span class="post-meta-item-text">Word count in article: </span>
-      <span>1.4k</span>
+      <span>1.5k</span>
     </span>
     <span class="post-meta-item" title="Reading time">
       <span class="post-meta-item-icon">
         <i class="far fa-clock"></i>
       </span>
       <span class="post-meta-item-text">Reading time &asymp;</span>
-      <span>5 mins.</span>
+      <span>6 mins.</span>
     </span>
 </div>
 
+            <div class="post-description">在網路上尋找有關新增 system call 至 Linux 核心的文章時，發現有些文章所提供的方式無法順利執行，可能是核心版本的差異導致作法不同，因此想紀錄下自己嘗試後能夠成功的方法。</div>
         </div>
       </header>
 
     
     
     
-    <div class="post-body" itemprop="articleBody"><p>在網路上尋找有關新增 system call 至 Linux 核心的文章時，發現有些文章所提供的方式無法順利執行，可能是核心版本的差異導致作法不同，因此想紀錄下自己嘗試後能夠成功的方法。</p>
-<span id="more"></span>
-
+    <div class="post-body" itemprop="articleBody"><h1 id="新增-System-Call-至-Linux-核心"><a href="#新增-System-Call-至-Linux-核心" class="headerlink" title="新增 System Call 至 Linux 核心"></a>新增 System Call 至 Linux 核心</h1><p>在網路上尋找有關新增 system call 至 Linux 核心的文章時，發現有些文章所提供的方式無法順利執行，可能是核心版本的差異導致作法不同，因此想紀錄下自己嘗試後能夠成功的方法。</p>
 <p>這篇文章除了是自己的筆記之外，也告訴大家如何新增一個簡單的 system call，並且透過 QEMU 運作。同時也感謝網路上許多大神的無私奉獻，提供各種教學文章。</p>
 <div class="note warning"><p>在本篇筆記的命令列範例中，若前綴為 $ 者，表示其執行在 host 端；而前綴為 # 者，表示其須執行在 guest 端 (qemu 內)</p>
 </div>
+
 
 <p>測試環境如下：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">OS: Ubuntu 22.04</span><br><span class="line">ARCH: X86_64</span><br><span class="line">Source Version: 6.6</span><br></pre></td></tr></table></figure>
@@ -276,13 +275,19 @@
 <p>編譯 kernel，參數 $(nproc) 代表系統最大核心數量：</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">make ARCH=x86 CROSS_COMPILE=x86_64-linux-gnu- -j$(<span class="built_in">nproc</span>)</span></span><br></pre></td></tr></table></figure>
 <blockquote>
-<p>針對 Arm64 處理器架構，將指令更改為 <code>make ARCH=arm64 CORSS_COMPILE=aarch64-linux-gun- -j$(nproc)</code></p>
+<p>針對 Arm64 處理器架構，將指令更改為：<br> <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">make ARCH=arm64 CORSS_COMPILE=aarch64-linux-gun- -j$(<span class="built_in">nproc</span>)</span></span><br></pre></td></tr></table></figure></p>
 </blockquote>
 <p>編譯結束後，預期會見到以下訊息：</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Kernel: arch/x86/boot/bzImage is ready</span><br></pre></td></tr></table></figure>
 
 <h1 id="Build-Root-FS"><a href="#Build-Root-FS" class="headerlink" title="Build Root FS"></a>Build Root FS</h1><p>回到專案資料夾 <code>linux-kernel</code> 內下載 busybox 並編譯：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">wget https://busybox.net/downloads/busybox-1.36.1.tar.bz2</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">tar -xf busybox-1.36.1.tar.bz2</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">cd</span> busybox-1.36.1</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">make menuconfig</span> </span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">cd</span> ..</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">wget https://busybox.net/downloads/busybox-1.36.1.tar.bz2</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">tar -xf busybox-1.36.1.tar.bz2</span></span><br></pre></td></tr></table></figure>
+
+<p>截至目前為止，專案資料夾結構應如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">linux-kernel</span><br><span class="line">├─ busybox-1.36.1</span><br><span class="line">└─ linux-6.6</span><br></pre></td></tr></table></figure>
+
+<p>移動至 <code>busybox-1.36.1</code> 資料夾內並執行 <code>make menuconfig</code></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">cd</span> busybox-1.36.1</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">make menuconfig</span> </span><br></pre></td></tr></table></figure>
 
 <p>選擇 <code>Settings ---&gt; Build static binary</code> 並執行：</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">make install</span></span><br></pre></td></tr></table></figure>
@@ -315,8 +320,8 @@
 <p>在 <code>syscall_64.tbl</code> 檔案的最上方也相有對應的說明：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">#</span><br><span class="line"># 64-bit system call numbers and entry vectors</span><br><span class="line">#</span><br><span class="line"># The format is:</span><br><span class="line"># &lt;number&gt; &lt;abi&gt; &lt;name&gt; &lt;entry point&gt;</span><br><span class="line">#</span><br><span class="line"># The __x64_sys_*() stubs are created on-the-fly for sys_*() system calls</span><br><span class="line">#</span><br><span class="line"># The abi is &quot;common&quot;, &quot;64&quot; or &quot;x32&quot; for this file.</span><br><span class="line">#</span><br></pre></td></tr></table></figure>
 
-<h2 id="修改-syscalls-h"><a href="#修改-syscalls-h" class="headerlink" title="修改 syscalls.h"></a>修改 <code>syscalls.h</code></h2><p>開啟 <code>include/linux/syscalls.h</code> 並在 943 行加入宣告。</p>
-<figure class="highlight diff"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">  asmlinkage long sys_map_shadow_stack(unsigned long addr, unsigned long size, unsigned int flags);</span><br><span class="line"><span class="addition">+ asmlinkage long sys_my_syscall();</span></span><br></pre></td></tr></table></figure>
+<h2 id="修改-syscalls-h"><a href="#修改-syscalls-h" class="headerlink" title="修改 syscalls.h"></a>修改 <code>syscalls.h</code></h2><p>開啟 <code>include/linux/syscalls.h</code> 並在 <code>asmlinkage long sys_map_shadow_stack();</code> 的後放 (約第 943 行) 加入宣告。</p>
+<figure class="highlight diff"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">  asmlinkage long sys_cachestat(unsigned int fd,</span><br><span class="line">		struct cachestat_range __user *cstat_range,</span><br><span class="line">		struct cachestat __user *cstat, unsigned int flags);</span><br><span class="line">  asmlinkage long sys_map_shadow_stack(unsigned long addr, unsigned long size, unsigned int flags);</span><br><span class="line"><span class="addition">+ asmlinkage long sys_my_syscall();</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  /*</span><br><span class="line">   * Architecture-specific system calls</span><br><span class="line">   */</span><br><span class="line"></span><br><span class="line">  /* x86 */</span><br><span class="line">  asmlinkage long sys_ioperm(unsigned long from, unsigned long num, int on);</span><br></pre></td></tr></table></figure>
 
 <h2 id="撰寫-system-call-程式碼"><a href="#撰寫-system-call-程式碼" class="headerlink" title="撰寫 system call 程式碼"></a>撰寫 system call 程式碼</h2><p>新增一個檔案叫做 <code>my_syscall.c</code> ，路徑為 <code>kernel/my_syscall.c</code>。</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/syscalls.h&gt;</span></span></span><br><span class="line"></span><br><span class="line">SYSCALL_DEFINE0(my_syscall)</span><br><span class="line">&#123;</span><br><span class="line">	printk(<span class="string">&quot;Hello Linux&quot;</span>);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -331,10 +336,14 @@
 <p>再重新編譯一次 kernel：</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">make ARCH=x86 CROSS_COMPILE=x86_64-linux-gnu- -j$(<span class="built_in">nproc</span>)</span></span><br></pre></td></tr></table></figure>
 
-<h1 id="測試-System-Call"><a href="#測試-System-Call" class="headerlink" title="測試 System Call"></a>測試 System Call</h1><p>接下來我們需要在外部先編譯靜態連結的測試程式碼，並呼叫我們所寫好的 system call 。首先在 kernel 資料夾的外面新增一個檔案叫做 <code>project1.c</code>。</p>
-<p><img src="https://hackmd.io/_uploads/SkD0m-QNyg.png" alt="image"></p>
+<h1 id="測試-System-Call"><a href="#測試-System-Call" class="headerlink" title="測試 System Call"></a>測試 System Call</h1><p>接下來我們需要在外部先編譯靜態連結的測試程式碼，並呼叫我們所寫好的 system call 。首先在 <code>linux-6.6</code> 資料夾的外面 (專案資料夾內) 新增一個檔案叫做 <code>project1.c</code>。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">cd</span> ..</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">vim project1.c</span></span><br></pre></td></tr></table></figure>
+
 <p>在 <code>project1.c</code> 內輸入以下程式碼：</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">long</span> <span class="title function_">my_syscall</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="keyword">return</span> syscall(<span class="number">454</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">  my_syscall();</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>到目前為止，專案資料夾內的檔案架構應如下。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">linux-kernel</span><br><span class="line">├─ busybox-1.36.1</span><br><span class="line">├─ linux-6.6</span><br><span class="line">└─ project1.c</span><br></pre></td></tr></table></figure>
 
 <p>接下來編譯這個檔案。</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">gcc -static project1.c -o project1</span></span><br></pre></td></tr></table></figure>
@@ -343,6 +352,8 @@
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">cd</span> busybox-1.36.1/_install</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">cp</span> ../../project1 .</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">find . | cpio -o --format=newc | gzip &gt; ../../linux-6.6/rootfs.img.gz</span></span><br></pre></td></tr></table></figure>
 
 <h1 id="Run-User-Program"><a href="#Run-User-Program" class="headerlink" title="Run User Program"></a>Run User Program</h1><p>到 <code>linux-6.6</code> 底下再執行一次 qemu：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">cd</span> ../../linux-6.6/</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">qemu-system-x86_64 -kernel vmlinux -nographic -initrd rootfs.img.gz -append <span class="string">&quot;root=/dev/ram rdinit=/sbin/init console=ttyS0&quot;</span></span></span><br></pre></td></tr></table></figure>
+
 <p><img src="https://hackmd.io/_uploads/HJN64-mEke.png" alt="image"></p>
 <p>按下 enter 之後就可以開始輸入指令了，首先輸入 <code>ls</code> ：</p>
 <p><img src="https://hackmd.io/_uploads/SJrrB-mEJe.png" alt="image"></p>
@@ -405,13 +416,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="Word count total">4k</span>
+    <span title="Word count total">5k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="Reading time total">16 mins.</span>
+    <span title="Reading time total">17 mins.</span>
   </span>
 </div>
   <div class="powered-by">Powered by <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" rel="noopener" target="_blank">NexT.Mist</a>
