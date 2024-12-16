@@ -32,7 +32,7 @@
 <meta property="og:image" content="https://hackmd.io/_uploads/SJrrB-mEJe.png">
 <meta property="og:image" content="https://hackmd.io/_uploads/S1Rec-7NJx.png">
 <meta property="article:published_time" content="2024-12-08T12:01:51.000Z">
-<meta property="article:modified_time" content="2024-12-16T14:14:02.755Z">
+<meta property="article:modified_time" content="2024-12-16T14:17:06.669Z">
 <meta property="article:author" content="Duck Cone">
 <meta property="article:tag" content="Linux">
 <meta name="twitter:card" content="summary">
@@ -304,10 +304,10 @@
 <p>設定 rcS 腳本的權限並且建立 rootfs 的 image。</p>
 <figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">chmod</span> +x etc/init.d/rcS</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">find . | cpio -o --format=newc | gzip &gt; ../../linux-6.6/rootfs.img.gz</span></span><br></pre></td></tr></table></figure>
 
-<p>測試 kernel 是否能順利運作，首先移動至 linux-6.6 資料夾並啟動 qemu 。</p>
+<p>測試 kernel 是否能順利運作，首先移動至 linux-6.6 資料夾並啟動 QEMU 。</p>
 <figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">cd</span> ../../linux-6.6</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">qemu-system-x86_64 -kernel vmlinux -nographic -initrd rootfs.img.gz -append <span class="string">&quot;root=/dev/ram rdinit=/sbin/init console=ttyS0&quot;</span></span></span><br></pre></td></tr></table></figure>
 
-<p>當看到以下畫面，代表順利進入 qemu 執行環境，可以輸入 <code>ls</code> 指令做確認：<br><img src="https://hackmd.io/_uploads/H1rh_i_fke.png" alt="image"></p>
+<p>當看到以下畫面，代表順利進入 QEMU 執行環境，可以輸入 <code>ls</code> 指令做確認：<br><img src="https://hackmd.io/_uploads/H1rh_i_fke.png" alt="image"></p>
 <p>若要離開測試環境，可以按下 Ctrl-A 放開再按下 X 按鍵。</p>
 <h1 id="Add-System-Call"><a href="#Add-System-Call" class="headerlink" title="Add System Call"></a>Add System Call</h1><h2 id="修改-syscall-64-tbl"><a href="#修改-syscall-64-tbl" class="headerlink" title="修改 syscall_64.tbl"></a>修改 <code>syscall_64.tbl</code></h2><p>首先打開 <code>arch/x86/entry/syscalls/syscall_64.tbl</code> 並且在 377 行後面新增我們自己的 system call 以及對應的編號。</p>
 <p><img src="https://hackmd.io/_uploads/HJA_p9Bmkg.png" alt="image"></p>
@@ -351,7 +351,7 @@
 <p>將編譯完成的執行檔複製到 <code>busybox-1.36.1/_install</code> 內，並重新製作 image。</p>
 <figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">cd</span> busybox-1.36.1/_install</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">cp</span> ../../project1 .</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">find . | cpio -o --format=newc | gzip &gt; ../../linux-6.6/rootfs.img.gz</span></span><br></pre></td></tr></table></figure>
 
-<h1 id="Run-User-Program"><a href="#Run-User-Program" class="headerlink" title="Run User Program"></a>Run User Program</h1><p>到 <code>linux-6.6</code> 底下再執行一次 qemu。</p>
+<h1 id="Run-User-Program"><a href="#Run-User-Program" class="headerlink" title="Run User Program"></a>Run User Program</h1><p>到 <code>linux-6.6</code> 底下再執行一次 QEMU。</p>
 <figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">cd</span> ../../linux-6.6/</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">qemu-system-x86_64 -kernel vmlinux -nographic -initrd rootfs.img.gz -append <span class="string">&quot;root=/dev/ram rdinit=/sbin/init console=ttyS0&quot;</span></span></span><br></pre></td></tr></table></figure>
 
 <p><img src="https://hackmd.io/_uploads/HJN64-mEke.png" alt="image"></p>
