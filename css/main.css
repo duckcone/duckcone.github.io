@@ -1265,7 +1265,7 @@ pre code {
   vertical-align: middle;
 }
 .links-of-author a::before {
-  background: #47b92d;
+  background: #ffc844;
   display: inline-block;
   margin-right: 3px;
   transform: translateY(-2px);
@@ -1883,6 +1883,14 @@ pre code {
     text-align: justify;
   }
 }
+.post-body h1,
+.post-body h2,
+.post-body h3,
+.post-body h4,
+.post-body h5,
+.post-body h6 {
+  color: #ffbe50;
+}
 .post-body h1 .header-anchor,
 .post-body h2 .header-anchor,
 .post-body h3 .header-anchor,
@@ -2019,6 +2027,7 @@ pre code {
   font-weight: normal;
   margin: initial;
   overflow-wrap: break-word;
+  color: #ffbe50;
 }
 .posts-expand .post-title-link {
   border-bottom: 0;
