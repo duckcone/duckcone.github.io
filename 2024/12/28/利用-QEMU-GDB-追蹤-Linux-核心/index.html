@@ -30,8 +30,9 @@
 <meta property="og:image" content="https://hackmd.io/_uploads/SkhTN3CEye.png">
 <meta property="og:image" content="https://hackmd.io/_uploads/r1Aer3ANJx.png">
 <meta property="og:image" content="https://hackmd.io/_uploads/rkY8HnCNJx.png">
+<meta property="og:image" content="https://hackmd.io/_uploads/Sy8RzlkUye.png">
 <meta property="article:published_time" content="2024-12-28T12:18:25.000Z">
-<meta property="article:modified_time" content="2024-12-28T12:28:40.070Z">
+<meta property="article:modified_time" content="2024-12-29T17:04:31.611Z">
 <meta property="article:author" content="Duck Cone">
 <meta property="article:tag" content="Linux">
 <meta property="article:tag" content="C">
@@ -119,7 +120,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%88%A9%E7%94%A8-QEMU-GDB-%E8%BF%BD%E8%B9%A4-Linux-%E6%A0%B8%E5%BF%83"><span class="nav-number">1.</span> <span class="nav-text">利用 QEMU + GDB 追蹤 Linux 核心</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Build-Linux-Kernel"><span class="nav-number">2.</span> <span class="nav-text">Build Linux Kernel</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Build-Root-FS"><span class="nav-number">3.</span> <span class="nav-text">Build Root FS</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%95%9F%E5%8B%95-GDB"><span class="nav-number">4.</span> <span class="nav-text">啟動 GDB</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A8%AD%E5%AE%9A%E4%B8%AD%E6%96%B7%E9%BB%9E"><span class="nav-number">4.1.</span> <span class="nav-text">設定中斷點</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%83%E8%80%83%E8%B3%87%E6%96%99"><span class="nav-number">5.</span> <span class="nav-text">參考資料</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%88%A9%E7%94%A8-QEMU-GDB-%E8%BF%BD%E8%B9%A4-Linux-%E6%A0%B8%E5%BF%83"><span class="nav-number">1.</span> <span class="nav-text">利用 QEMU + GDB 追蹤 Linux 核心</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Build-Linux-Kernel"><span class="nav-number">2.</span> <span class="nav-text">Build Linux Kernel</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Build-Root-FS"><span class="nav-number">3.</span> <span class="nav-text">Build Root FS</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%95%9F%E5%8B%95-GDB"><span class="nav-number">4.</span> <span class="nav-text">啟動 GDB</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A8%AD%E5%AE%9A%E4%B8%AD%E6%96%B7%E9%BB%9E"><span class="nav-number">4.1.</span> <span class="nav-text">設定中斷點</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%A7%80%E5%AF%9F-Linux-%E6%A0%B8%E5%BF%83%E4%B8%AD%E6%96%B7%E6%A9%9F%E5%88%B6"><span class="nav-number">5.</span> <span class="nav-text">觀察 Linux 核心中斷機制</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%83%E8%80%83%E8%B3%87%E6%96%99"><span class="nav-number">6.</span> <span class="nav-text">參考資料</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -228,14 +229,14 @@
         <i class="far fa-file-word"></i>
       </span>
       <span class="post-meta-item-text">Word count in article: </span>
-      <span>1.8k</span>
+      <span>2.2k</span>
     </span>
     <span class="post-meta-item" title="Reading time">
       <span class="post-meta-item-icon">
         <i class="far fa-clock"></i>
       </span>
       <span class="post-meta-item-text">Reading time &asymp;</span>
-      <span>7 mins.</span>
+      <span>8 mins.</span>
     </span>
 </div>
 
@@ -394,6 +395,41 @@
 
 <p><img src="https://hackmd.io/_uploads/rkY8HnCNJx.png" alt="image"></p>
 <p>當我們希望程式繼續執行至下一個中斷點時的時候可以輸入 c ，由於我們沒有設定其他的中斷點，因此可以發現在 QEMU 的環境內 Linux 核心會直接完成載入。</p>
+<h1 id="觀察-Linux-核心中斷機制"><a href="#觀察-Linux-核心中斷機制" class="headerlink" title="觀察 Linux 核心中斷機制"></a>觀察 Linux 核心中斷機制</h1><p>以 Intel 為例，在 <a target="_blank" rel="noopener" href="https://www.intel.com/content/dam/www/public/us/en/documents/manuals/64-ia-32-architectures-software-developer-vol-3a-part-1-manual.pdf">Intel® 64 and IA-32 Architectures Software Developer’s Manual Vol 3A</a> 的 Table 6-1 中提供了異常和中斷向量表 (Exceptions and Interrupts Table ，簡稱 IDT) ，並且列出了 21 個 traps 。</p>
+<p><img src="https://hackmd.io/_uploads/Sy8RzlkUye.png" alt="image"></p>
+<p>接下來可以透過 GDB 觀察以下函式，來了解 Linux 核心的中斷機制。</p>
+<table>
+<thead>
+<tr>
+<th>函式名稱</th>
+<th>目的</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>trap_init()</code></td>
+<td>由 <code>start_kernel()</code> (相當於 Linux 的 main) 呼叫，初始化 Intel 處理器的 traps</td>
+</tr>
+<tr>
+<td><code>init_IRQ()</code></td>
+<td>由 <code>start_kernel()</code> (相當於 Linux 的 main) 呼叫，設定外部中斷的中斷向量表</td>
+</tr>
+<tr>
+<td><code>native_init_IRQ</code></td>
+<td><code>init_IRQ</code> 呼叫此函數「真正」去設定中斷向量表</td>
+</tr>
+<tr>
+<td><code>serial_link_irq_chain</code></td>
+<td>UART 驅動程式向 Linux 核心 註冊當 serial port 裝置發生中斷時，應該呼叫哪個函數，此函數屬於驅動程式的一部分</td>
+</tr>
+<tr>
+<td><code>common_interrupt</code></td>
+<td>所有的中斷服務函式都會「跳到」這段組合語言，它的主要功能是將所有的暫存器除存下來，然後呼叫 <code>do_IRQ</code> ，從 <code>do_IRQ</code> 開始就是 C 語言</td>
+</tr>
+<tr>
+<td><code>serial8250_interrupt</code></td>
+<td>如果這個裝置會發出中斷，那麼這樣的函數就是開發驅動程式的人必須撰寫的「其中一部分」。此部份稱之為 top halve ，由 <code>common_ingterrupt-&gt;do_IRQ</code> 開始一層層呼叫，直到此函數</td>
+</tr>
+</tbody></table>
 <h1 id="參考資料"><a href="#參考資料" class="headerlink" title="參考資料"></a>參考資料</h1><ul>
 <li><a target="_blank" rel="noopener" href="https://docs.kernel.org/dev-tools/gdb-kernel-debugging.html">Debugging kernel and modules via gdb</a></li>
 <li><a target="_blank" rel="noopener" href="https://www.intel.com/content/www/us/en/docs/programmable/730783/24-1/preparing-linux-for-kernel-debugging.html">Preparing Linux for Kernel Debugging</a></li>
@@ -461,7 +497,7 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="Reading time total">17 mins.</span>
+    <span title="Reading time total">18 mins.</span>
   </span>
 </div>
   <div class="powered-by">Powered by <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" rel="noopener" target="_blank">NexT.Mist</a>
