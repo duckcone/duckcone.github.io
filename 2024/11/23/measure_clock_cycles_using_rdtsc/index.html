@@ -28,7 +28,7 @@
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://hackmd.io/_uploads/SkCyz4qM1e.png">
 <meta property="article:published_time" content="2024-11-23T08:15:36.000Z">
-<meta property="article:modified_time" content="2025-08-11T14:32:50.564Z">
+<meta property="article:modified_time" content="2025-08-11T14:51:25.601Z">
 <meta property="article:author" content="Duck Cone">
 <meta property="article:tag" content="Linux">
 <meta property="article:tag" content="OS">
@@ -282,7 +282,7 @@
 
 
 <p><strong>解析</strong></p>
-<p>首先在第 4 行會呼叫 <code>rdtsc</code> ，因此在 <code>rdx</code> 以及 <code>edx</code> 會分別存放 <code>rdtsc</code> 所回傳的高 32 位元以及低 32 位元資料，在第 5 行首先將 <code>rdx</code> 的資料左移 32 位元並且在第 7 行將左移後的資料存入記憶體。因此我們只需要在第 6 行中先將 <code>rax</code> 的資料放入記憶體，之後再將 <code>rdx</code> 左移後的資料與記憶體內 <code>rax</code> 的資料進行 OR 運算，最後將記憶體的資料傳給變數 <code>msr</code> 。</p>
+<p>首先在第 4 行會呼叫 <code>rdtsc</code> ，因此在 <code>rdx</code> 以及 <code>rax</code> 會分別存放 <code>rdtsc</code> 所回傳的高 32 位元以及低 32 位元資料，在第 5 行首先將 <code>rdx</code> 的資料左移 32 位元並且在第 7 行將左移後的資料存入記憶體。因此我們只需要在第 6 行中先將 <code>rax</code> 的資料放入記憶體，之後再將 <code>rdx</code> 左移後的資料與記憶體內 <code>rax</code> 的資料進行 OR 運算，最後將記憶體的資料傳給變數 <code>msr</code> 。</p>
 <figure class="highlight diff"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line">int main(int argc, char** argv) &#123;</span><br><span class="line">    unsigned long msr;</span><br><span class="line">    asm volatile ( &quot;rdtsc\n\t&quot;  // Returns the time in EDX:EAX.</span><br><span class="line">        &quot;shl $32, %%rdx\n\t&quot;    // Shift the upper bits left.</span><br><span class="line"><span class="addition">+       &quot;mov %%rax, %0\n\t&quot;</span></span><br><span class="line">        &quot;or %%rdx, %0&quot;          // &#x27;Or&#x27; in the lower bits.</span><br><span class="line">        : &quot;=m&quot; (msr)            //msr 會放在記憶體 </span><br><span class="line">        : </span><br><span class="line"><span class="addition">+       : &quot;rdx&quot;, &quot;rax&quot;);</span></span><br><span class="line">    printf(&quot;msr: %lx\n&quot;, msr);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 
