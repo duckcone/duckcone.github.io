@@ -28,7 +28,7 @@
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://hackmd.io/_uploads/SkCyz4qM1e.png">
 <meta property="article:published_time" content="2024-11-23T08:15:36.000Z">
-<meta property="article:modified_time" content="2025-01-21T06:22:09.050Z">
+<meta property="article:modified_time" content="2025-08-11T14:32:50.564Z">
 <meta property="article:author" content="Duck Cone">
 <meta property="article:tag" content="Linux">
 <meta property="article:tag" content="OS">
@@ -256,7 +256,7 @@
 <blockquote>
 <p>參考資料：<a target="_blank" rel="noopener" href="https://ithelp.ithome.com.tw/articles/10241159">Day6 - 為什麼要使用暫存器？</a></p>
 </blockquote>
-<h1 id="C-語言內嵌組合語言"><a href="#C-語言內嵌組合語言" class="headerlink" title="C 語言內嵌組合語言"></a>C 語言內嵌組合語言</h1><p>有時，為了能增進程式的效率，或者在 C 語言當中加入一些組合語言程式碼，我們會採用內嵌的方式，將組合語言內嵌在C語言當中。針對這點，gcc提供了如圖 4.10的內嵌語法，讓我們在 C 語言中可以直接撰寫組合語言。其中，assembler template 為組合語言程式、output operands 為輸入參數、input operands 為輸入參數，而 list of clobbered registers 則指定了被更改的暫存器參數列表。</p>
+<h1 id="C-語言內嵌組合語言"><a href="#C-語言內嵌組合語言" class="headerlink" title="C 語言內嵌組合語言"></a>C 語言內嵌組合語言</h1><p>有時，為了能增進程式的效率，或者在 C 語言當中加入一些組合語言程式碼，我們會採用內嵌的方式，將組合語言內嵌在C語言當中。針對這點，gcc提供了如圖 4.10的內嵌語法，讓我們在 C 語言中可以直接撰寫組合語言。其中，assembler template 為組合語言程式、output operands 為輸出參數、input operands 為輸入參數，而 list of clobbered registers 則指定了被更改的暫存器參數列表。</p>
 <figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="keyword">asm</span>(                                   ; 內嵌起始符號</span><br><span class="line">     assembler template                ; 組合語言程式</span><br><span class="line">     : output operands                 ; : 輸出參數列表</span><br><span class="line">     : input operands                  ; : 輸入參數列表</span><br><span class="line">     : <span class="built_in">list</span> of clobbered registers     ; : 被更改的暫存器列表</span><br><span class="line">     );</span><br></pre></td></tr></table></figure>
 
 <p>在GNU的內嵌組合語言 (assembler template) 中，由於 % 被用作參數 %1, %2, … 的前置字元，因此當遇到暫存器(像是 %eax) 時，必須使用兩個 % 符號 (%%) 作為暫存器的起始標記，因此，在範例 4.24中，原本的 <code>addl %ebx, %eax</code> 指令，就成了 <code>addl %%ebx, %%eax</code> 這個更冗長的指令。</p>
