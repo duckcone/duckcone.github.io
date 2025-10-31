@@ -19,20 +19,20 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"duckcone.github.io","root":"/","images":"/images","scheme":"Mist","darkmode":false,"version":"8.21.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"always","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/js/config.js"></script>
 
-    <meta name="description" content="GDB 全名為 GNU Debugger ，是 GNU 軟體系統中的標準除錯器。本篇文章主要是介紹如何編譯 Linux 核心並且在 QEMU 中運作，同時透過 GDB 追蹤 Linux 核心。">
+    <meta name="description" content="透過實際操作來了解如何新增一個 System call 至 Linux 核心。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="利用 QEMU 與 GDB 追蹤 Linux 核心">
-<meta property="og:url" content="https://duckcone.github.io/2024/12/28/debugging_the_linux_kernel_with_gdb/index.html">
+<meta property="og:title" content="新增 System Call 至 Linux 核心">
+<meta property="og:url" content="https://duckcone.github.io/2024/12/08/add_a_syscall_to_the_linux_kernel/index.html">
 <meta property="og:site_name" content="Duck Cone">
-<meta property="og:description" content="GDB 全名為 GNU Debugger ，是 GNU 軟體系統中的標準除錯器。本篇文章主要是介紹如何編譯 Linux 核心並且在 QEMU 中運作，同時透過 GDB 追蹤 Linux 核心。">
+<meta property="og:description" content="透過實際操作來了解如何新增一個 System call 至 Linux 核心。">
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://hackmd.io/_uploads/H1rh_i_fke.png">
-<meta property="og:image" content="https://hackmd.io/_uploads/SkhTN3CEye.png">
-<meta property="og:image" content="https://hackmd.io/_uploads/r1Aer3ANJx.png">
-<meta property="og:image" content="https://hackmd.io/_uploads/rkY8HnCNJx.png">
-<meta property="og:image" content="https://hackmd.io/_uploads/Sy8RzlkUye.png">
-<meta property="article:published_time" content="2024-12-28T12:18:25.000Z">
-<meta property="article:modified_time" content="2024-12-31T11:42:14.000Z">
+<meta property="og:image" content="https://hackmd.io/_uploads/HJA_p9Bmkg.png">
+<meta property="og:image" content="https://hackmd.io/_uploads/HJN64-mEke.png">
+<meta property="og:image" content="https://hackmd.io/_uploads/SJrrB-mEJe.png">
+<meta property="og:image" content="https://hackmd.io/_uploads/S1Rec-7NJx.png">
+<meta property="article:published_time" content="2024-12-08T12:01:51.000Z">
+<meta property="article:modified_time" content="2025-10-31T03:33:04.120Z">
 <meta property="article:author" content="Duck Cone">
 <meta property="article:tag" content="Linux">
 <meta property="article:tag" content="OS">
@@ -40,14 +40,14 @@
 <meta name="twitter:image" content="https://hackmd.io/_uploads/H1rh_i_fke.png">
 
 
-<link rel="canonical" href="https://duckcone.github.io/2024/12/28/debugging_the_linux_kernel_with_gdb/">
+<link rel="canonical" href="https://duckcone.github.io/2024/12/08/add_a_syscall_to_the_linux_kernel/">
 
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"en","comments":true,"permalink":"https://duckcone.github.io/2024/12/28/debugging_the_linux_kernel_with_gdb/","path":"2024/12/28/debugging_the_linux_kernel_with_gdb/","title":"利用 QEMU 與 GDB 追蹤 Linux 核心"}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"en","comments":true,"permalink":"https://duckcone.github.io/2024/12/08/add_a_syscall_to_the_linux_kernel/","path":"2024/12/08/add_a_syscall_to_the_linux_kernel/","title":"新增 System Call 至 Linux 核心"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
-<title>利用 QEMU 與 GDB 追蹤 Linux 核心 | Duck Cone</title>
+<title>新增 System Call 至 Linux 核心 | Duck Cone</title>
   
 
 
@@ -119,7 +119,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%88%A9%E7%94%A8-QEMU-%E8%88%87-GDB-%E8%BF%BD%E8%B9%A4-Linux-%E6%A0%B8%E5%BF%83"><span class="nav-number">1.</span> <span class="nav-text">利用 QEMU 與 GDB 追蹤 Linux 核心</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Build-Linux-Kernel"><span class="nav-number">2.</span> <span class="nav-text">Build Linux Kernel</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Build-Root-FS"><span class="nav-number">3.</span> <span class="nav-text">Build Root FS</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%95%9F%E5%8B%95-GDB"><span class="nav-number">4.</span> <span class="nav-text">啟動 GDB</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A8%AD%E5%AE%9A%E4%B8%AD%E6%96%B7%E9%BB%9E"><span class="nav-number">4.1.</span> <span class="nav-text">設定中斷點</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%A7%80%E5%AF%9F-Linux-%E6%A0%B8%E5%BF%83%E4%B8%AD%E6%96%B7%E6%A9%9F%E5%88%B6"><span class="nav-number">5.</span> <span class="nav-text">觀察 Linux 核心中斷機制</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%83%E8%80%83%E8%B3%87%E6%96%99"><span class="nav-number">6.</span> <span class="nav-text">參考資料</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%96%B0%E5%A2%9E-System-Call-%E8%87%B3-Linux-%E6%A0%B8%E5%BF%83"><span class="nav-number">1.</span> <span class="nav-text">新增 System Call 至 Linux 核心</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Build-Linux-Kernel"><span class="nav-number">2.</span> <span class="nav-text">Build Linux Kernel</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Build-Root-FS"><span class="nav-number">3.</span> <span class="nav-text">Build Root FS</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Add-System-Call"><span class="nav-number">4.</span> <span class="nav-text">Add System Call</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9-syscall-64-tbl"><span class="nav-number">4.1.</span> <span class="nav-text">修改 syscall_64.tbl</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9-syscalls-h"><span class="nav-number">4.2.</span> <span class="nav-text">修改 syscalls.h</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%92%B0%E5%AF%AB-system-call-%E7%A8%8B%E5%BC%8F%E7%A2%BC"><span class="nav-number">4.3.</span> <span class="nav-text">撰寫 system call 程式碼</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%B8%AC%E8%A9%A6-System-Call"><span class="nav-number">5.</span> <span class="nav-text">測試 System Call</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Run-User-Program"><span class="nav-number">6.</span> <span class="nav-text">Run User Program</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%83%E8%80%83%E8%B3%87%E6%96%99"><span class="nav-number">7.</span> <span class="nav-text">參考資料</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -180,7 +180,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en">
-    <link itemprop="mainEntityOfPage" href="https://duckcone.github.io/2024/12/28/debugging_the_linux_kernel_with_gdb/">
+    <link itemprop="mainEntityOfPage" href="https://duckcone.github.io/2024/12/08/add_a_syscall_to_the_linux_kernel/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/duckcone.jpg">
@@ -193,12 +193,12 @@
     </span>
 
     <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="利用 QEMU 與 GDB 追蹤 Linux 核心 | Duck Cone">
-      <meta itemprop="description" content="GDB 全名為 GNU Debugger ，是 GNU 軟體系統中的標準除錯器。本篇文章主要是介紹如何編譯 Linux 核心並且在 QEMU 中運作，同時透過 GDB 追蹤 Linux 核心。">
+      <meta itemprop="name" content="新增 System Call 至 Linux 核心 | Duck Cone">
+      <meta itemprop="description" content="透過實際操作來了解如何新增一個 System call 至 Linux 核心。">
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          利用 QEMU 與 GDB 追蹤 Linux 核心
+          新增 System Call 至 Linux 核心
         </h1>
 
         <div class="post-meta-container">
@@ -209,7 +209,7 @@
       </span>
       <span class="post-meta-item-text">Posted on</span>
 
-      <time title="Created: 2024-12-28 20:18:25" itemprop="dateCreated datePublished" datetime="2024-12-28T20:18:25+08:00">2024-12-28</time>
+      <time title="Created: 2024-12-08 20:01:51" itemprop="dateCreated datePublished" datetime="2024-12-08T20:01:51+08:00">2024-12-08</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -235,27 +235,29 @@
         <i class="far fa-file-word"></i>
       </span>
       <span class="post-meta-item-text">Word count in article: </span>
-      <span>2.2k</span>
+      <span>1.6k</span>
     </span>
     <span class="post-meta-item" title="Reading time">
       <span class="post-meta-item-icon">
         <i class="far fa-clock"></i>
       </span>
       <span class="post-meta-item-text">Reading time &asymp;</span>
-      <span>8 mins.</span>
+      <span>6 mins.</span>
     </span>
 </div>
 
-            <div class="post-description">GDB 全名為 GNU Debugger ，是 GNU 軟體系統中的標準除錯器。本篇文章主要是介紹如何編譯 Linux 核心並且在 QEMU 中運作，同時透過 GDB 追蹤 Linux 核心。</div>
+            <div class="post-description">透過實際操作來了解如何新增一個 System call 至 Linux 核心。</div>
         </div>
       </header>
 
     
     
     
-    <div class="post-body" itemprop="articleBody"><h1 id="利用-QEMU-與-GDB-追蹤-Linux-核心"><a href="#利用-QEMU-與-GDB-追蹤-Linux-核心" class="headerlink" title="利用 QEMU 與 GDB 追蹤 Linux 核心"></a>利用 QEMU 與 GDB 追蹤 Linux 核心</h1><p>GDB 全名為 GNU Debugger ，是 GNU 軟體系統中的標準除錯器，在許多類 Unix 的作業系統中都能夠使用，而現有的 GDB 所能支援除錯的程式語言有 C 、 C++ 、 Pascal 以及 FORTRAN。本篇文章主要是介紹如何編譯 Linux 核心並且在 QEMU 中運作，同時透過 GDB 追蹤 Linux 核心。</p>
-<div class="note warning"><p>在本篇筆記的命令列範例中，若前綴為 $ 者，表示其執行在 host 端；前綴為 # 者，表示其須執行在 guest 端 (QEMU 內)；前綴為 (gdb) 者，表示其執行在 GDB 模式。</p>
+    <div class="post-body" itemprop="articleBody"><h1 id="新增-System-Call-至-Linux-核心"><a href="#新增-System-Call-至-Linux-核心" class="headerlink" title="新增 System Call 至 Linux 核心"></a>新增 System Call 至 Linux 核心</h1><p>在網路上尋找有關新增 system call 至 Linux 核心的文章時，發現有些文章所提供的方式無法順利執行，可能是核心版本的差異導致作法不同，因此想紀錄下自己嘗試後能夠成功的方法。</p>
+<p>這篇文章除了是自己的筆記之外，也告訴大家如何新增一個簡單的 system call，並且透過 QEMU 運作。同時也感謝網路上許多大神的無私奉獻，提供各種教學文章。</p>
+<div class="note warning"><p>在本篇筆記的命令列範例中，若前綴為 $ 者，表示其執行在 host 端；而前綴為 # 者，表示其須執行在 guest 端 (QEMU 內)</p>
 </div>
+
 
 <p>測試環境如下：</p>
 <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">OS: Ubuntu 22.04</span><br><span class="line">ARCH: X86_64</span><br><span class="line">Linux Kernel Source Version: 6.6</span><br></pre></td></tr></table></figure>
@@ -266,7 +268,7 @@
 <p>新增一個專案資料夾並進入該資料夾。</p>
 <figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">mkdir</span> -p linux-kernel &amp;&amp; <span class="built_in">cd</span> linux-kernel</span></span><br></pre></td></tr></table></figure>
 
-<p>下載 kernel 的 source code 並且 build 起來，可以使用 wget 下載核心壓縮檔或者使用 git clone 取得原始碼，這裡使用 wget 作為示範。</p>
+<p>下載 kernel 的 source code 並且 build 起來，可以使用 wget 下載核心壓縮檔或者使用 git clone 取得原始碼，這裡使用 wget 作為示範e。</p>
 <figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">wget https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.6.tar.xz</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">tar -xvf linux-6.6.tar.xz</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">cd</span> linux-6.6</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">make allnoconfig</span></span><br></pre></td></tr></table></figure>
 <blockquote>
 <p>使用 git clone:</p>
@@ -276,15 +278,7 @@
 <figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">make menuconfig</span></span><br></pre></td></tr></table></figure>
 
 <p>將下列所有選項都勾起來：</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">Linux/x86 6.6.0 Kernel Configuration</span><br><span class="line"></span><br><span class="line">├─ General Setup</span><br><span class="line">│   └─ Initial RAM filesystem and RAM disk (initramfs/initrd) support -&gt; Enable</span><br><span class="line">├─ 64-bit kernel -&gt; Enable</span><br><span class="line">├─ Process type and features </span><br><span class="line">│   └─ Linux guest support -&gt; Enable</span><br><span class="line">│       └─ Support for running PVH guests -&gt; Enable</span><br><span class="line">├─ Enable loadable module support -&gt; Enable</span><br><span class="line">├─ Executable file formats -&gt; Enable all</span><br><span class="line">├─ Device Drivers</span><br><span class="line">│   └─ Character devices</span><br><span class="line">│        └─ Serial drivers</span><br><span class="line">│            ├─ 8250/16550 and compatible serial support -&gt; Enable</span><br><span class="line">│            └─ Console on 8250/16550 and compatible serial port -&gt; Enable</span><br><span class="line">└─ Kernel hacking</span><br><span class="line">    ├─ Kernel debugging -&gt; Enable</span><br><span class="line">    └─ Compile-time checks and compiler options</span><br><span class="line">        ├─ Debug information</span><br><span class="line">        │   └─ Generate DWARF Version 4 debuginfo -&gt; Enable</span><br><span class="line">        └─ Provide GDB scripts for kernel debugging -&gt; Enable</span><br></pre></td></tr></table></figure>
-
-<div class="note warning"><p>這邊需要確保 <code>CONFIG_DEBUG_INFO</code> 以及 <code>CONFIG_GDB_SCRIPTS</code> 在組態中有被開啟，以利後續實驗使用。方法是在 <code>$ make</code> 命令前，執行：</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">grep CONFIG_DEBUG_INFO .config</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">grep CONFIG_GDB_SCRIPTS .config</span></span><br></pre></td></tr></table></figure>
-
-<p>預期要看到：</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">CONFIG_DEBUG_INFO=y</span><br><span class="line">CONFIG_GDB_SCRIPTS=y</span><br></pre></td></tr></table></figure></div>
-
-
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">Linux/x86 6.6.0 Kernel Configuration</span><br><span class="line"></span><br><span class="line">├─ General Setup</span><br><span class="line">│   └─ Initial RAM filesystem and RAM disk (initramfs/initrd) support -&gt; Enable</span><br><span class="line">├─ 64-bit kernel -&gt; Enable</span><br><span class="line">├─ Process type and features </span><br><span class="line">│   └─ Linux guest support -&gt; Enable</span><br><span class="line">│       └─ Support for running PVH guests -&gt; Enable</span><br><span class="line">├─ Executable file formats -&gt; Enable all</span><br><span class="line">└─ Device Drivers</span><br><span class="line">    └─ Character devices</span><br><span class="line">         └─ Serial drivers</span><br><span class="line">             ├─ 8250/16550 and compatible serial support -&gt; Enable</span><br><span class="line">             └─ Console on 8250/16550 and compatible serial port -&gt; Enable</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 
 <p>編譯 kernel，參數 $(nproc) 代表系統最大核心數量。</p>
 <figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">make ARCH=x86 CROSS_COMPILE=x86_64-linux-gnu- -j$(<span class="built_in">nproc</span>)</span></span><br></pre></td></tr></table></figure>
@@ -294,16 +288,6 @@
 <p>編譯結束後，預期會見到以下訊息：</p>
 <figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">Kernel: arch/x86/boot/bzImage is ready</span><br></pre></td></tr></table></figure>
 
-<p>在編譯完成後，額外執行以下命令：</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">make ARCH=x86 scripts_gdb</span></span><br></pre></td></tr></table></figure>
-<p>我們首先嘗試使用以下指令啟動核心。</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">qemu-system-x86_64 -kernel <span class="built_in">arch</span>/x86/boot/bzImage -nographic -append <span class="string">&quot;console=ttyS0&quot;</span></span></span><br></pre></td></tr></table></figure>
-
-<p>基本的意思就是啟動一台 x86_64 架構處理器的 VM ，以 bzImage 映像檔作為核心 ，關閉圖形並將文字輸出到 ttyS0 裝置上。</p>
-<p>沒有特別的狀況的話， 核心會開始啟動，直到處理器使用率被跑滿，畫面會停在這一句：</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">[    1.882581] ---[ end Kernel panic - not syncing: VFS: Unable to mount root fs on unknown-block(0,0) ]---</span><br></pre></td></tr></table></figure>
-
-<p>表示 kernel 找不到可以掛載的 rootfs (root filesystem) ，沒辦法啟動應該在裡面的 init process。這時候我們可以按下 Ctrl-A 放開再按下 X 按鍵來離開 QEMU 環境。</p>
 <h1 id="Build-Root-FS"><a href="#Build-Root-FS" class="headerlink" title="Build Root FS"></a>Build Root FS</h1><p>回到專案資料夾 <code>linux-kernel</code> 內下載 busybox 並編譯。</p>
 <figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">cd</span> ..</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">wget https://busybox.net/downloads/busybox-1.36.1.tar.bz2</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">tar -xf busybox-1.36.1.tar.bz2</span></span><br></pre></td></tr></table></figure>
 
@@ -323,10 +307,7 @@
 <figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">vim ./etc/init.d/rcS</span></span><br></pre></td></tr></table></figure>
 
 <p>將以下腳本寫入至 rcS 並儲存 (# 為註解符號，並非執行於 QEMU 內)：</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_">#</span><span class="language-bash">!/bin/sh</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">Mount the /proc and /sys filesystems</span></span><br><span class="line">mount -t proc none /proc</span><br><span class="line">mount -t sysfs none /sys</span><br><span class="line">mount -t devtmpfs none /dev</span><br><span class="line">mount -t debugfs none /sys/kernel/debug</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">Populate /dev</span></span><br><span class="line">/sbin/mdev -s</span><br></pre></td></tr></table></figure>
-
-<div class="note warning"><p>並非所有的檔案都需要 mount ，可視實際需求而定</p>
-</div>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_">#</span><span class="language-bash">!/bin/sh</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">Mount the /proc and /sys filesystems</span></span><br><span class="line">mount -t proc none /proc</span><br><span class="line">mount -t sysfs none /sys</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">Populate /dev</span></span><br><span class="line">/sbin/mdev -s</span><br></pre></td></tr></table></figure>
 
 <p>設定 rcS 腳本的權限並且建立 rootfs 的 image。</p>
 <figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">chmod</span> +x etc/init.d/rcS</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">find . | cpio -o --format=newc | gzip &gt; ../../linux-6.6/rootfs.img.gz</span></span><br></pre></td></tr></table></figure>
@@ -336,113 +317,62 @@
 
 <p>當看到以下畫面，代表順利進入 QEMU 執行環境，可以輸入 <code>ls</code> 指令做確認：<br><img src="https://hackmd.io/_uploads/H1rh_i_fke.png" alt="image"></p>
 <p>若要離開測試環境，可以按下 Ctrl-A 放開再按下 X 按鍵。</p>
-<h1 id="啟動-GDB"><a href="#啟動-GDB" class="headerlink" title="啟動 GDB"></a>啟動 GDB</h1><p>linux kernel 有提供一些 linux debug 用的 GDB 指令，可以修改 GDB 的設定檔讓 GDB 啟動時自動載入加入這些指令的 script</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">echo</span> <span class="string">&quot;add-auto-load-safe-path `pwd`/scripts/gdb/vmlinux-gdb.py&quot;</span> &gt;&gt; ~/.gdbinit</span></span><br></pre></td></tr></table></figure>
+<h1 id="Add-System-Call"><a href="#Add-System-Call" class="headerlink" title="Add System Call"></a>Add System Call</h1><h2 id="修改-syscall-64-tbl"><a href="#修改-syscall-64-tbl" class="headerlink" title="修改 syscall_64.tbl"></a>修改 <code>syscall_64.tbl</code></h2><p>首先打開 <code>arch/x86/entry/syscalls/syscall_64.tbl</code> 並且在 377 行後面新增我們自己的 system call 以及對應的編號。</p>
+<p><img src="https://hackmd.io/_uploads/HJA_p9Bmkg.png" alt="image"></p>
+<p>這行有 4 個部份，每項之間由空白或是 tab 相隔。，它們代表的意義是：</p>
+<ul>
+<li><code>454</code><br>System call number ，在使用系統呼叫所使用的數字。</li>
+<li><code>common</code><br>支援的 ABI ，只能是 <code>64</code> 、 <code>x32</code> 或 <code>common</code> ，分別表示「只支援 amd 64」、「只支援 x32」或是「都支援」。</li>
+<li><code>my_syscall</code><br>system call 的名字</li>
+<li><code>sys_my_syscall</code><br>system call 對應的實作，Linux 核心中通常會用 <code>sys</code> 開頭來代表 system call 的實作</li>
+</ul>
+<p>在 <code>syscall_64.tbl</code> 檔案的最上方也相有對應的說明。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#</span><br><span class="line"># 64-bit system call numbers and entry vectors</span><br><span class="line">#</span><br><span class="line"># The format is:</span><br><span class="line"># &lt;number&gt; &lt;abi&gt; &lt;name&gt; &lt;entry point&gt;</span><br><span class="line">#</span><br><span class="line"># The __x64_sys_*() stubs are created on-the-fly for sys_*() system calls</span><br><span class="line">#</span><br><span class="line"># The abi is &quot;common&quot;, &quot;64&quot; or &quot;x32&quot; for this file.</span><br><span class="line">#</span><br></pre></td></tr></table></figure>
 
-<p>輸入以下指令以再次啟動 Linux 核心。</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">qemu-system-x86_64 -kernel vmlinux -nographic -initrd rootfs.img.gz -append <span class="string">&quot;root=/dev/ram rdinit=/sbin/init console=ttyS0&quot;</span> -S -s</span></span><br></pre></td></tr></table></figure>
-<p><code>-S</code> 參數是讓 QEMU 將 VM 啟動時就將 VM 停住等待 GDB 的指令， <code>-s</code> 參數則是讓 QEMU 會監聽 <code>port:1234</code> 的連線。nokaslr 的核心參數是停用隨機分配 kernel 運作位址的功能。</p>
-<p>接著開啟新的終端機移動到 <code>linux/linux-6.6</code> 並且啟動 GDB 。</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">cd</span> linux/linux-6.6</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">gdb vmlinux -tui</span></span><br></pre></td></tr></table></figure>
+<h2 id="修改-syscalls-h"><a href="#修改-syscalls-h" class="headerlink" title="修改 syscalls.h"></a>修改 <code>syscalls.h</code></h2><p>開啟 <code>include/linux/syscalls.h</code> 並在 <code>asmlinkage long sys_map_shadow_stack();</code> 的後方 (約第 943 行) 加入宣告。</p>
+<figure class="highlight diff"><table><tr><td class="gutter"><pre><span class="line">939</span><br><span class="line">940</span><br><span class="line">941</span><br><span class="line">942</span><br><span class="line">943</span><br><span class="line">944</span><br><span class="line">945</span><br><span class="line">946</span><br><span class="line">947</span><br><span class="line">948</span><br><span class="line">949</span><br><span class="line">950</span><br><span class="line">951</span><br></pre></td><td class="code"><pre><span class="line">  asmlinkage long sys_cachestat(unsigned int fd,</span><br><span class="line">		struct cachestat_range __user *cstat_range,</span><br><span class="line">		struct cachestat __user *cstat, unsigned int flags);</span><br><span class="line">  asmlinkage long sys_map_shadow_stack(unsigned long addr, unsigned long size, unsigned int flags);</span><br><span class="line"><span class="addition">+ asmlinkage long sys_my_syscall();</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  /*</span><br><span class="line">   * Architecture-specific system calls</span><br><span class="line">   */</span><br><span class="line"></span><br><span class="line">  /* x86 */</span><br><span class="line">  asmlinkage long sys_ioperm(unsigned long from, unsigned long num, int on);</span><br></pre></td></tr></table></figure>
 
-<p>參數 <code>-tui</code> 將以 TUI (Text User Interface) 模式啟動 GDB ，這個功能能夠在 GDB 命令列頂部顯示一個包含原始程式碼的視窗。</p>
-<p>進入到 GDB 模式後我們首先需要設定監聽的埠號</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">(gdb) target remote:1234</span><br></pre></td></tr></table></figure>
+<h2 id="撰寫-system-call-程式碼"><a href="#撰寫-system-call-程式碼" class="headerlink" title="撰寫 system call 程式碼"></a>撰寫 system call 程式碼</h2><p>新增一個檔案叫做 <code>my_syscall.c</code> ，路徑為 <code>kernel/my_syscall.c</code>。</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/syscalls.h&gt;</span></span></span><br><span class="line"></span><br><span class="line">SYSCALL_DEFINE0(my_syscall)</span><br><span class="line">&#123;</span><br><span class="line">	printk(<span class="string">&quot;Hello Linux&quot;</span>);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<h2 id="設定中斷點"><a href="#設定中斷點" class="headerlink" title="設定中斷點"></a>設定中斷點</h2><p>接下來可以設定中斷點來觀察核心的運作情況，可以利用 GDB 將中斷點設定在以下函式，並查看其作用。</p>
 <blockquote>
-<p>不同的 Linux 核心版本所提供函式可能不同，以本文中所使用的 x86 平台為例，下列的函式在核心版本 5.0 仍存在，但到了 6.0 之後則有些被移除。可透過 <a target="_blank" rel="noopener" href="https://elixir.bootlin.com/linux/v6.12.6/source/kernel">Elixir Bootlin</a> 比較不同核心版本之間的差異</p>
+<p><code>SYSCALL_DEFINE0</code> 表示定義該 system call 無參數， <code>SYSCALL_DEFINE1</code> 代表可定義一個參數，依此類推。<br>e.g.</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">SYSCALL_DEFINE1(my_syscall, <span class="type">long</span>, arg1)</span><br></pre></td></tr></table></figure>
 </blockquote>
-<table>
-<thead>
-<tr>
-<th>函式</th>
-<th>說明</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>start_kernel</td>
-<td>大概可以視為 Linux 的 main function</td>
-</tr>
-<tr>
-<td>syscall_init</td>
-<td>設定 system call 的進入點</td>
-</tr>
-<tr>
-<td>set_intr_gate</td>
-<td>設定中斷向量表</td>
-</tr>
-<tr>
-<td>entry_SYSCALL_64</td>
-<td>System call 的進入點， <code>rax</code> 暫存器內放的是系統呼叫的編號</td>
-</tr>
-<tr>
-<td>apic_timer_interrupt</td>
-<td>時間中斷的進入點</td>
-</tr>
-<tr>
-<td>interrupt_entry</td>
-<td>負責將所有暫存器 push 到堆疊，在中斷完成之後可以繼續原先的工作</td>
-</tr>
-<tr>
-<td>do_IRQ</td>
-<td>Linux 處理中斷的地方，中斷編號放在 <code>vector = ~regs-&gt;orig_ax;</code></td>
-</tr>
-</tbody></table>
-<p>首先我們將中斷點設定在 <code>start_kernel</code> ，並且輸入 c (continue) 讓程式繼續執行至設定的中斷點。</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">(gdb) b start_kernel</span><br><span class="line">(gdb) c</span><br></pre></td></tr></table></figure>
-<p><img src="https://hackmd.io/_uploads/SkhTN3CEye.png" alt="image"></p>
-<p>可以發現 GDB 會將程式暫停在進入 <code>start_kerne()</code> (Line 871) 的位置，接下來可以透過輸入 n (next) 來進行單步執行。</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">(gdb) n</span><br></pre></td></tr></table></figure>
+<p>接下來要將檔案新增到 makefile 裡面，開啟 <code>kernel/Makefile</code> 並將新增我們的 system call 。</p>
+<figure class="highlight makefile"><table><tr><td class="code"><pre><span class="line">obj-y     = fork.o exec_domain.o panic.o \</span><br><span class="line">	    cpu.o exit.o softirq.o resource.o \</span><br><span class="line">	    sysctl.o capability.o ptrace.o user.o \</span><br><span class="line">	    signal.o sys.o umh.o workqueue.o pid.o task_work.o \</span><br><span class="line">	    extable.o params.o \</span><br><span class="line">	    kthread.o sys_ni.o nsproxy.o \</span><br><span class="line">	    notifier.o ksysfs.o cred.o reboot.o \</span><br><span class="line">	    async.o range.o smpboot.o ucount.o regset.o ksyms_common.o \</span><br><span class="line">	    my_syscall.o</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://hackmd.io/_uploads/r1Aer3ANJx.png" alt="image"></p>
-<p>在輸入 n 之後可以發現 GDB 將程式暫停在第 875 行的 <code>set_task_stack_end_magic()</code> ，若是想要進入該函式可以輸入 s (step) ，並且游標會移動至第 1096 行，也就是進入 <code>set_task_stack_end_magic()</code> 內。</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">(gdb) s</span><br></pre></td></tr></table></figure>
+<p>再重新編譯一次 kernel。</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">make ARCH=x86 CROSS_COMPILE=x86_64-linux-gnu- -j$(<span class="built_in">nproc</span>)</span></span><br></pre></td></tr></table></figure>
 
-<p><img src="https://hackmd.io/_uploads/rkY8HnCNJx.png" alt="image"></p>
-<p>當我們希望程式繼續執行至下一個中斷點時的時候可以輸入 c ，由於我們沒有設定其他的中斷點，因此可以發現在 QEMU 的環境內 Linux 核心會直接完成載入。</p>
-<h1 id="觀察-Linux-核心中斷機制"><a href="#觀察-Linux-核心中斷機制" class="headerlink" title="觀察 Linux 核心中斷機制"></a>觀察 Linux 核心中斷機制</h1><p>以 Intel 為例，在 <a target="_blank" rel="noopener" href="https://www.intel.com/content/dam/www/public/us/en/documents/manuals/64-ia-32-architectures-software-developer-vol-3a-part-1-manual.pdf">Intel® 64 and IA-32 Architectures Software Developer’s Manual Vol 3A</a> 的 Table 6-1 中提供了異常和中斷向量表 (Exceptions and Interrupts Table ，簡稱 IDT) ，並且列出了 21 個 traps 。</p>
-<p><img src="https://hackmd.io/_uploads/Sy8RzlkUye.png" alt="image"></p>
-<p>接下來可以透過 GDB 觀察以下函式，來了解 Linux 核心的中斷機制。</p>
-<table>
-<thead>
-<tr>
-<th>函式名稱</th>
-<th>目的</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><code>trap_init()</code></td>
-<td>由 <code>start_kernel()</code> (相當於 Linux 的 main) 呼叫，初始化 Intel 處理器的 traps</td>
-</tr>
-<tr>
-<td><code>init_IRQ()</code></td>
-<td>由 <code>start_kernel()</code> (相當於 Linux 的 main) 呼叫，設定外部中斷的中斷向量表</td>
-</tr>
-<tr>
-<td><code>native_init_IRQ</code></td>
-<td><code>init_IRQ</code> 呼叫此函數「真正」去設定中斷向量表</td>
-</tr>
-<tr>
-<td><code>serial_link_irq_chain</code></td>
-<td>UART 驅動程式向 Linux 核心 註冊當 serial port 裝置發生中斷時，應該呼叫哪個函數，此函數屬於驅動程式的一部分</td>
-</tr>
-<tr>
-<td><code>common_interrupt</code></td>
-<td>所有的中斷服務函式都會「跳到」這段組合語言，它的主要功能是將所有的暫存器除存下來，然後呼叫 <code>do_IRQ</code> ，從 <code>do_IRQ</code> 開始就是 C 語言</td>
-</tr>
-<tr>
-<td><code>serial8250_interrupt</code></td>
-<td>如果這個裝置會發出中斷，那麼這樣的函數就是開發驅動程式的人必須撰寫的「其中一部分」。此部份稱之為 top halve ，由 <code>common_ingterrupt-&gt;do_IRQ</code> 開始一層層呼叫，直到此函數</td>
-</tr>
-</tbody></table>
+<h1 id="測試-System-Call"><a href="#測試-System-Call" class="headerlink" title="測試 System Call"></a>測試 System Call</h1><p>接下來我們需要在外部先編譯靜態連結的測試程式碼，並呼叫我們所寫好的 system call 。首先在 <code>linux-6.6</code> 資料夾的外面 (專案資料夾內) 新增一個檔案叫做 <code>project1.c</code>。</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">cd</span> ..</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">vim project1.c</span></span><br></pre></td></tr></table></figure>
+
+<p>在 <code>project1.c</code> 內輸入以下程式碼：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">long</span> <span class="title function_">my_syscall</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="keyword">return</span> syscall(<span class="number">454</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">  my_syscall();</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>到目前為止，專案資料夾內的檔案架構應如下：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">linux-kernel</span><br><span class="line">├─ busybox-1.36.1</span><br><span class="line">├─ linux-6.6</span><br><span class="line">└─ project1.c</span><br></pre></td></tr></table></figure>
+
+<p>接下來編譯這個檔案。</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">gcc -static project1.c -o project1</span></span><br></pre></td></tr></table></figure>
+
+<p>將編譯完成的執行檔複製到 <code>busybox-1.36.1/_install</code> 內，並重新製作 image。</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">cd</span> busybox-1.36.1/_install</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">cp</span> ../../project1 .</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">find . | cpio -o --format=newc | gzip &gt; ../../linux-6.6/rootfs.img.gz</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="Run-User-Program"><a href="#Run-User-Program" class="headerlink" title="Run User Program"></a>Run User Program</h1><p>到 <code>linux-6.6</code> 底下再執行一次 QEMU。</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">cd</span> ../../linux-6.6/</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">qemu-system-x86_64 -kernel vmlinux -nographic -initrd rootfs.img.gz -append <span class="string">&quot;root=/dev/ram rdinit=/sbin/init console=ttyS0&quot;</span></span></span><br></pre></td></tr></table></figure>
+
+<p><img src="https://hackmd.io/_uploads/HJN64-mEke.png" alt="image"></p>
+<p>按下 enter 之後就可以開始輸入指令了，首先輸入 <code>ls</code> 。</p>
+<p><img src="https://hackmd.io/_uploads/SJrrB-mEJe.png" alt="image"></p>
+<p>可以看到我們的執行檔案 <code>project1</code> 在裡面，接下來直接執行它。</p>
+<p><img src="https://hackmd.io/_uploads/S1Rec-7NJx.png" alt="image"></p>
 <h1 id="參考資料"><a href="#參考資料" class="headerlink" title="參考資料"></a>參考資料</h1><ul>
-<li><a target="_blank" rel="noopener" href="https://docs.kernel.org/dev-tools/gdb-kernel-debugging.html">Debugging kernel and modules via gdb</a></li>
-<li><a target="_blank" rel="noopener" href="https://www.intel.com/content/www/us/en/docs/programmable/730783/24-1/preparing-linux-for-kernel-debugging.html">Preparing Linux for Kernel Debugging</a></li>
-<li><a target="_blank" rel="noopener" href="https://github.com/beacer/notes/blob/master/kernel/kernel-qemu-gdb.md">通過 QEMU + GDB 調適 Linux 內核</a></li>
-<li><a target="_blank" rel="noopener" href="https://blog.austint.in/2022/01/16/run-and-debug-linux-kernel-in-qemu-vm.html">用 gdb debug 在 QEMU 上跑的 Linux Kernel</a></li>
-<li><a target="_blank" rel="noopener" href="https://sergioprado.blog/debugging-the-linux-kernel-with-gdb/">Debugging the Linux kernel with GDB</a></li>
-<li><a target="_blank" rel="noopener" href="http://nickdesaulniers.github.io/blog/2018/10/24/booting-a-custom-linux-kernel-in-qemu-and-debugging-it-with-gdb/">Booting a Custom Linux Kernel in QEMU and Debugging It With GDB</a></li>
+<li><a target="_blank" rel="noopener" href="https://hackmd.io/@Mes/make_phy_addr_syscall">實作一個回傳物理位址的系統呼叫</a></li>
+<li><a target="_blank" rel="noopener" href="https://hackmd.io/@ppodds/SyCuLJrmT">Add system call to Linux 6.6 and test it in QEMU</a></li>
+<li><a target="_blank" rel="noopener" href="https://hackmd.io/@sysprog/linux-virtme">測試 Linux 核心的虛擬化環境</a></li>
+<li><a target="_blank" rel="noopener" href="https://hackmd.io/@oscarshiang/linux-on-qemu-busybox">利用 QEMU 與 BusyBox 建立 Linux 測試環境</a></li>
 </ul>
 
     </div>
@@ -461,13 +391,13 @@
 
           <div class="post-nav">
             <div class="post-nav-item">
-                <a href="/2024/12/08/tracing_the_linux_kernel_using_qemu_and_gdb/" rel="prev" title="新增 System Call 至 Linux 核心">
-                  <i class="fa fa-angle-left"></i> 新增 System Call 至 Linux 核心
+                <a href="/2024/11/23/measure_clock_cycles_using_rdtsc/" rel="prev" title="利用 RDTSC 量測時脈週期">
+                  <i class="fa fa-angle-left"></i> 利用 RDTSC 量測時脈週期
                 </a>
             </div>
             <div class="post-nav-item">
-                <a href="/2025/01/21/linux-syscall/" rel="next" title="淺談 Linux 核心：系統呼叫 (System Call)">
-                  淺談 Linux 核心：系統呼叫 (System Call) <i class="fa fa-angle-right"></i>
+                <a href="/2024/12/28/tracing_the_linux_kernel_using_qemu_and_gdb/" rel="next" title="利用 QEMU 與 GDB 追蹤 Linux 核心">
+                  利用 QEMU 與 GDB 追蹤 Linux 核心 <i class="fa fa-angle-right"></i>
                 </a>
             </div>
           </div>
